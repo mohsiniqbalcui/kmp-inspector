@@ -1,0 +1,17 @@
+package com.mohsiniqbalcui.kmpinspector.sample
+
+import android.app.Application
+import com.mohsiniqbalcui.kmpinspector.data.initializeInspector
+
+/**
+ * Room and WorkManager both need a Context, and the worker runs with no Activity around, so the
+ * handover happens once here rather than from the UI.
+ */
+class SampleApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initializeSampleOnAndroid(this)
+        // Lets the inspector persist crashes across process death, and enables sharing.
+        initializeInspector(this)
+    }
+}

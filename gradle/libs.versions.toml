@@ -21,7 +21,7 @@ kmp-inspector = "1.0.0-beta03"
 [libraries]
 # The published library. The sample uses it when usePublishedInspector=true, to test the real
 # Maven Central artifact end to end; otherwise the sample builds against project(":library").
-kmp-inspector = { module = "io.github.waqas028:kmp-inspector", version.ref = "kmp-inspector" }
+kmp-inspector = { module = "io.github.debugkmpinspector:kmp-inspector", version.ref = "kmp-inspector" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }

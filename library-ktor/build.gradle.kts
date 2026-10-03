@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.waqas028"
+group = "io.github.debugkmpinspector"
 version = providers.gradleProperty("libraryVersion").getOrElse("1.0.0-SNAPSHOT")
 
 /**
@@ -16,7 +16,7 @@ version = providers.gradleProperty("libraryVersion").getOrElse("1.0.0-SNAPSHOT")
 kotlin {
     jvm()
     androidLibrary {
-        namespace = "com.waqas028.kmpinspector.ktor"
+        namespace = "com.mohsiniqbalcui.kmpinspector.ktor"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
@@ -48,7 +48,7 @@ mavenPublishing {
         name = "KmpInspector Ktor plugin"
         description = "Records Ktor client calls into the KmpInspector Network panel on Android, iOS and desktop."
         inceptionYear = "2026"
-        url = "https://github.com/waqas028/kmp-inspector/"
+        url = "https://github.com/mohsiniqbalcui/kmp-inspector/"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
@@ -58,15 +58,15 @@ mavenPublishing {
         }
         developers {
             developer {
-                id = "waqas028"
-                name = "Muhammad Waqas"
-                url = "https://github.com/waqas028/"
+                id = "mohsiniqbalcui"
+                name = "Mohsin Iqbal"
+                url = "https://github.com/mohsiniqbalcui/"
             }
         }
         scm {
-            url = "https://github.com/waqas028/kmp-inspector/"
-            connection = "scm:git:git://github.com/waqas028/kmp-inspector.git"
-            developerConnection = "scm:git:ssh://git@github.com/waqas028/kmp-inspector.git"
+            url = "https://github.com/mohsiniqbalcui/kmp-inspector/"
+            connection = "scm:git:git://github.com/mohsiniqbalcui/kmp-inspector.git"
+            developerConnection = "scm:git:ssh://git@github.com/mohsiniqbalcui/kmp-inspector.git"
         }
     }
 }

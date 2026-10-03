@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.waqas028"
+group = "io.github.debugkmpinspector"
 // CI derives this from the release tag (-PlibraryVersion=1.2.3); local builds fall back to a
 // snapshot so an accidental publish can never overwrite a released version. Do NOT rename the
 // property to VERSION_NAME -- the vanniktech plugin consumes that name itself and finalises the
@@ -18,7 +18,7 @@ version = providers.gradleProperty("libraryVersion").getOrElse("1.0.0-SNAPSHOT")
 kotlin {
     jvm()
     androidLibrary {
-        namespace = "com.waqas028.kmpinspector"
+        namespace = "com.mohsiniqbalcui.kmpinspector"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -78,7 +78,7 @@ kotlin {
 compose.resources {
     // Internal to the library: consumers should never see a generated Res class from a dependency.
     publicResClass = false
-    packageOfResClass = "com.waqas028.kmpinspector.resources"
+    packageOfResClass = "com.mohsiniqbalcui.kmpinspector.resources"
     generateResClass = always
 }
 
@@ -100,7 +100,7 @@ mavenPublishing {
             "traffic, database contents, background work, logs and crashes from inside a " +
             "running app on Android, iOS and desktop."
         inceptionYear = "2026"
-        url = "https://github.com/waqas028/kmp-inspector/"
+        url = "https://github.com/mohsiniqbalcui/kmp-inspector/"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
@@ -110,15 +110,15 @@ mavenPublishing {
         }
         developers {
             developer {
-                id = "waqas028"
-                name = "Muhammad Waqas"
-                url = "https://github.com/waqas028/"
+                id = "mohsiniqbalcui"
+                name = "Mohsin Iqbal"
+                url = "https://github.com/mohsiniqbalcui/"
             }
         }
         scm {
-            url = "https://github.com/waqas028/kmp-inspector/"
-            connection = "scm:git:git://github.com/waqas028/kmp-inspector.git"
-            developerConnection = "scm:git:ssh://git@github.com/waqas028/kmp-inspector.git"
+            url = "https://github.com/mohsiniqbalcui/kmp-inspector/"
+            connection = "scm:git:git://github.com/mohsiniqbalcui/kmp-inspector.git"
+            developerConnection = "scm:git:ssh://git@github.com/mohsiniqbalcui/kmp-inspector.git"
         }
     }
 }

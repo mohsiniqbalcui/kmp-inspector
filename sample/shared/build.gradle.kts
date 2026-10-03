@@ -13,7 +13,7 @@ plugins {
 
 kotlin {
     androidLibrary {
-        namespace = "com.waqas028.kmpinspector.sample.shared"
+        namespace = "com.mohsiniqbalcui.kmpinspector.sample.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -90,7 +90,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.waqas028.kmpinspector.sample.MainKt"
+        mainClass = "com.mohsiniqbalcui.kmpinspector.sample.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

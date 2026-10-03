@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.waqas028.kmpinspector.sample"
+    namespace = "com.mohsiniqbalcui.kmpinspector.sample"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.waqas028.kmpinspector.sample"
+        applicationId = "com.mohsiniqbalcui.kmpinspector.sample"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

@@ -17,6 +17,7 @@ rootProject.name = "KmpInspector"
 include(":library")
 include(":library-noop")
 include(":library-ktor")
+include(":library-ktor-noop")
 include(":library-room")
 include(":sample:shared")
 include(":sample:androidApp")
