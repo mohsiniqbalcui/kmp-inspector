@@ -63,7 +63,7 @@ Using a version catalog? Add both to `gradle/libs.versions.toml`:
 
 ```toml
 [versions]
-kmp-inspector = "1.0.0"
+kmp-inspector = "1.0.0-beta01"
 
 [libraries]
 kmp-inspector = { module = "io.github.debugkmpinspector:kmp-inspector", version.ref = "kmp-inspector" }
