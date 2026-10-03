@@ -71,7 +71,7 @@ jobs:
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Publishing io.github.waqas028:kmp-inspector:$VERSION from release tag $TAG"
+          echo "Publishing io.github.debugkmpinspector:kmp-inspector:$VERSION from release tag $TAG"
 
       - name: Publish to Maven Central
         env:
@@ -83,7 +83,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
       
         run: |
-          ./gradlew :library:publishAndReleaseToMavenCentral :library-noop:publishAndReleaseToMavenCentral :library-ktor:publishAndReleaseToMavenCentral :library-room:publishAndReleaseToMavenCentral \
+          ./gradlew :library:publishAndReleaseToMavenCentral :library-noop:publishAndReleaseToMavenCentral :library-ktor:publishAndReleaseToMavenCentral :library-ktor-noop:publishAndReleaseToMavenCentral :library-room:publishAndReleaseToMavenCentral \
             -PlibraryVersion="$VERSION" \
             --no-configuration-cache \
             --stacktrace
@@ -112,7 +112,7 @@ jobs:
         run: |
           # Only the dependency coordinates and the catalog entry; prose is left alone.
           perl -pi -e '
-            s{(io\.github\.waqas028:kmp-inspector(?:-no-op)?:)[0-9A-Za-z.-]+}{$1$ENV{VERSION}}g;
+            s{(io\.github\.mohsiniqbalcui:kmp-inspector(?:-no-op)?:)[0-9A-Za-z.-]+}{$1$ENV{VERSION}}g;
             s{^(kmp-inspector = ")[^"]*(")}{$1$ENV{VERSION}$2};
           ' README.md
           git diff --stat -- README.md

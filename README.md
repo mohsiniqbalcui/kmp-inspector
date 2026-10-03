@@ -1,12 +1,12 @@
 # KmpInspector lib (Beta)
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.waqas028/kmp-inspector.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.waqas028/kmp-inspector)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.debugkmpinspector/kmp-inspector.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.debugkmpinspector/kmp-inspector)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Desktop-brightgreen.svg)
 
 <p align="center">
-  <a href="https://buymeacoffee.com/waqas028">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=waqas028&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" height="45" />
+  <a href="https://buymeacoffee.com/mohsiniqbalcui">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=mohsiniqbalcui&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" height="45" />
   </a>
 </p>
 
@@ -54,8 +54,8 @@ Use the real artifact in debug builds and the `no-op` twin in release. The no-op
 ```kotlin
 // build.gradle.kts
 dependencies {
-    debugImplementation("io.github.waqas028:kmp-inspector:1.0.0")
-    releaseImplementation("io.github.waqas028:kmp-inspector-no-op:1.0.0")
+    debugImplementation("io.github.debugkmpinspector:kmp-inspector:1.0.0")
+    releaseImplementation("io.github.debugkmpinspector:kmp-inspector-no-op:1.0.0")
 }
 ```
 
@@ -66,8 +66,8 @@ Using a version catalog? Add both to `gradle/libs.versions.toml`:
 kmp-inspector = "1.0.0"
 
 [libraries]
-kmp-inspector = { module = "io.github.waqas028:kmp-inspector", version.ref = "kmp-inspector" }
-kmp-inspector-noop = { module = "io.github.waqas028:kmp-inspector-no-op", version.ref = "kmp-inspector" }
+kmp-inspector = { module = "io.github.debugkmpinspector:kmp-inspector", version.ref = "kmp-inspector" }
+kmp-inspector-noop = { module = "io.github.debugkmpinspector:kmp-inspector-no-op", version.ref = "kmp-inspector" }
 ```
 
 ```kotlin
@@ -79,8 +79,8 @@ releaseImplementation(libs.kmp.inspector.noop)
 Two optional companions live at the same version. `kmp-inspector-ktor` records Ktor client calls on every platform, and `kmp-inspector-room` shows a Room database on desktop and iOS as well as Android:
 
 ```kotlin
-implementation("io.github.waqas028:kmp-inspector-ktor:1.0.0-beta03")
-implementation("io.github.waqas028:kmp-inspector-room:1.0.0-beta03")
+implementation("io.github.debugkmpinspector:kmp-inspector-ktor:1.0.0-beta03")
+implementation("io.github.debugkmpinspector:kmp-inspector-room:1.0.0-beta03")
 ```
 
 A Compose Multiplatform shared module has no debug/release split of its own, so add the real artifact there with `implementation` and rely on `KmpInspector(enabled = ...)` and `install(enabled = ...)` to switch it off; both are no-ops when disabled, and the artifact ships the R8 rules it needs.
@@ -111,7 +111,7 @@ The short rule: on Android the library collects on its own; off Android it draws
 ### Android: one call, nothing to wrap
 
 ```kotlin
-import com.waqas028.kmpinspector.KmpInspector
+import com.mohsiniqbalcui.kmpinspector.KmpInspector
 
 class MyApplication : Application() {
     override fun onCreate() {
@@ -128,7 +128,7 @@ Two sources cannot be discovered from outside your code and stay one line each:
 ```kotlin
 // Network — add after your header interceptors so the recorded request is what was sent
 OkHttpClient.Builder()
-    .addInterceptor(KmpInspectorInterceptor())   // com.waqas028.kmpinspector.okhttp
+    .addInterceptor(KmpInspectorInterceptor())   // com.mohsiniqbalcui.kmpinspector.okhttp
 
 // Database — Room 2.7+. Snapshots now and again each time the inspector is opened
 KmpInspector.attach(database, fileName = "app.db")
@@ -151,7 +151,7 @@ Share as cURL or Text masks `Authorization`, `Cookie`, `Set-Cookie`, `Proxy-Auth
 Wrap your root composable once. The bubble and the whole inspector come from the library — you build none of that UI yourself.
 
 ```kotlin
-import com.waqas028.kmpinspector.KmpInspector
+import com.mohsiniqbalcui.kmpinspector.KmpInspector
 
 @Composable
 fun App() {
@@ -195,7 +195,7 @@ class MainActivity : ComponentActivity() {
 **One extra Android step** — give the inspector a `Context` in your `Application`, so crashes survive process death and the crash **Share** button works:
 
 ```kotlin
-import com.waqas028.kmpinspector.data.initializeInspector
+import com.mohsiniqbalcui.kmpinspector.data.initializeInspector
 
 class MyApplication : Application() {
     override fun onCreate() {
@@ -262,12 +262,12 @@ fun main() = application {
 On Android, `install` plus the OkHttp interceptor and `attach` cover the common sources. On every platform, the two companion artifacts cover Ktor and Room:
 
 ```kotlin
-// Network, any platform: com.waqas028.kmpinspector.ktor
+// Network, any platform: com.mohsiniqbalcui.kmpinspector.ktor
 HttpClient {
     install(KmpInspectorPlugin)
 }
 
-// Database, any platform: com.waqas028.kmpinspector.room
+// Database, any platform: com.mohsiniqbalcui.kmpinspector.room
 RoomInspector.attach(database, fileName = "app.db")
 ```
 
@@ -276,8 +276,8 @@ The Ktor plugin records method, URL, status, timing, headers and text bodies, an
 Everything else goes through the `Inspector` and `InspectorLog` entry points. Call `Inspector.configure(...)` once at startup, then record data wherever it happens in your app.
 
 ```kotlin
-import com.waqas028.kmpinspector.Inspector
-import com.waqas028.kmpinspector.InspectorLog
+import com.mohsiniqbalcui.kmpinspector.Inspector
+import com.mohsiniqbalcui.kmpinspector.InspectorLog
 
 // Identify the session in the inspector header (e.g. "com.example.shop · debug")
 Inspector.configure(appId = "com.example.shop", variant = "debug")
@@ -355,9 +355,9 @@ val inspectorEnabled = System.getenv("CONFIGURATION") != "Release" &&
 sourceSets {
     commonMain.dependencies {
         if (inspectorEnabled) {
-            implementation("io.github.waqas028:kmp-inspector:1.0.0")
+            implementation("io.github.debugkmpinspector:kmp-inspector:1.0.0")
         } else {
-            implementation("io.github.waqas028:kmp-inspector-no-op:1.0.0")
+            implementation("io.github.debugkmpinspector:kmp-inspector-no-op:1.0.0")
         }
     }
 }
@@ -379,7 +379,7 @@ open sample/iosApp/iosApp.xcodeproj       # iOS — then Cmd+R
 
 ## Issues
 
-Found a bug, or something not working as described? Please [open an issue](https://github.com/waqas028/kmp-inspector/issues) with your platform, versions, and steps to reproduce.
+Found a bug, or something not working as described? Please [open an issue](https://github.com/mohsiniqbalcui/kmp-inspector/issues) with your platform, versions, and steps to reproduce.
 
 ## Contributing
 
@@ -396,7 +396,7 @@ Contributions are welcome! Please follow these steps:
 <table>
 <tr>
 <td width="130" valign="top">
-<a href="https://x.com/waqas028?s=08" target="_blank">
+<a href="https://x.com/mohsiniqbalcui?s=08" target="_blank">
   <img src="https://github.com/user-attachments/assets/99199ad1-a69d-4ceb-8599-e495a1ed937b" width="110" style="border-radius:12px;">
 </a>
 </td>
@@ -406,8 +406,8 @@ Contributions are welcome! Please follow these steps:
 
 [![Email](https://img.shields.io/badge/Email-waqaswaseem679@gmail.com-D14836?style=flat&logo=gmail&logoColor=white)](mailto:waqaswaseem679@gmail.com)  
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/muhammad-waqas-4399361a3)  
-[![GitHub](https://img.shields.io/badge/GitHub-waqas028-181717?style=flat&logo=github&logoColor=white)](https://github.com/waqas028)  
-[![Twitter](https://img.shields.io/badge/Twitter-@waqas028-000000?style=flat&logo=x&logoColor=white)](https://x.com/waqas028?s=08)  
+[![GitHub](https://img.shields.io/badge/GitHub-mohsiniqbalcui-181717?style=flat&logo=github&logoColor=white)](https://github.com/mohsiniqbalcui)  
+[![Twitter](https://img.shields.io/badge/Twitter-@mohsiniqbalcui-000000?style=flat&logo=x&logoColor=white)](https://x.com/mohsiniqbalcui?s=08)  
 [![Skype](https://img.shields.io/badge/Skype-live%3Awaqasyaqeen420-00AFF0?style=flat&logo=skype&logoColor=white)](https://join.skype.com/invite/p4ckdyAOrsCs)  
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat-25D366?style=flat&logo=whatsapp&logoColor=white)](https://wa.me/+923045593294)  
 [![Google Developer](https://img.shields.io/badge/Google%20Developer-Profile-4285F4?style=flat&logo=google&logoColor=white)](https://g.dev/MuhammadWaqasDev)  

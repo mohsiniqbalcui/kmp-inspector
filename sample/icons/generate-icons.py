@@ -5,7 +5,7 @@ from PIL import Image
 
 root = Path(__file__).resolve().parents[2]
 icons = root / 'sample/icons'
-source = (root / 'library/src/commonMain/kotlin/com/waqas028/kmpinspector/presentation/theme/InspectorIcons.kt').read_text()
+source = (root / 'library/src/commonMain/kotlin/com/mohsiniqbalcui/kmpinspector/presentation/theme/InspectorIcons.kt').read_text()
 path = re.search(r'private const val TRAVEL_EXPLORE_PATH_DATA =\s*"([^"]+)"', source)[1]
 # Keep the existing Material symbol comfortably within Android's adaptive safe zone.
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 108 108">

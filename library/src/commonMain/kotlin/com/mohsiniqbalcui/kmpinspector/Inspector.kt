@@ -1,0 +1,173 @@
+package com.mohsiniqbalcui.kmpinspector
+
+import com.mohsiniqbalcui.kmpinspector.data.InspectorPlatform
+import com.mohsiniqbalcui.kmpinspector.data.InspectorStore
+import com.mohsiniqbalcui.kmpinspector.data.installPlatformCrashHandler
+import com.mohsiniqbalcui.kmpinspector.domain.model.CrashRecord
+import com.mohsiniqbalcui.kmpinspector.domain.model.DatabaseController
+import com.mohsiniqbalcui.kmpinspector.domain.model.DbInfo
+import com.mohsiniqbalcui.kmpinspector.domain.model.DbTable
+import com.mohsiniqbalcui.kmpinspector.domain.model.NetworkRequest
+import com.mohsiniqbalcui.kmpinspector.domain.model.StackFrame
+import com.mohsiniqbalcui.kmpinspector.domain.model.WorkJob
+
+/**
+ * How data gets into the inspector. Everything the UI shows arrives through these calls, so a host
+ * app can feed it from whichever HTTP client, database or scheduler it actually uses.
+ */
+object Inspector {
+
+    /**
+     * The master switch, on by default. Set it to false at startup and every entry point here goes
+     * quiet: nothing is captured, no crash handler is installed, and [setDatabase] keeps no handle
+     * to your database.
+     *
+     * This is what a Compose Multiplatform app should use, because only Android can swap in the
+     * no-op artifact per build type. It does not remove the code from an iOS or desktop binary —
+     * for that, depend on `kmp-inspector-no-op` in release builds — but it does stop the inspector
+     * doing any work or holding any of your data.
+     *
+     * ```
+     * Inspector.enabled = isDebugBuild
+     * ```
+     */
+    var enabled: Boolean
+        get() = InspectorStore.enabled
+        set(value) { InspectorStore.enabled = value }
+
+    /**
+     * Identifies the session in the inspector header, e.g. `com.example.shop · debug`. Call once at
+     * startup; without it the header reads `unknown`.
+     */
+    fun configure(appId: String, variant: String = "debug") {
+        InspectorStore.appId = appId
+        InspectorStore.variant = variant
+    }
+
+    /**
+     * Captures uncaught exceptions so a fatal crash is still there after the app restarts.
+     *
+     * Opt-in rather than automatic: installing a global handler is a decision a host app should make
+     * knowingly, and the handler always delegates to whatever was installed before it, so an
+     * existing crash reporter keeps working and the app still crashes normally.
+     *
+     * [appPackagePrefix] marks which stack frames are yours — frames starting with it are pulled
+     * left and highlighted, everything else is treated as framework.
+     *
+     * Not everything is catchable. On iOS this covers unhandled *Kotlin* exceptions only;
+     * Objective-C/Swift exceptions and hard signals (SIGSEGV, SIGABRT) never reach it.
+     */
+    fun installCrashHandler(appPackagePrefix: String? = null) {
+        if (!enabled) return
+        // Idempotent on purpose. Each install chains onto the handler before it, so calling this
+        // twice made a single crash run both and record itself twice. Android's install() already
+        // calls this, and shared Compose code calling it again is the obvious way to hit that.
+        if (crashHandlerInstalled) return
+        crashHandlerInstalled = true
+        installPlatformCrashHandler(appPackagePrefix)
+    }
+
+    private var crashHandlerInstalled = false
+
+    /** Drops persisted crashes as well as the in-memory list. */
+    fun clearCrashes() = InspectorStore.clearCrashes()
+
+    fun recordRequest(request: NetworkRequest) = InspectorStore.addRequest(request)
+
+    /** Convenience for callers that do not want to build [NetworkRequest] by hand. */
+    fun recordRequest(
+        method: String,
+        url: String,
+        statusCode: Int?,
+        durationMillis: Long,
+        requestBytes: Long = 0,
+        responseBytes: Long = 0,
+    ) = InspectorStore.addRequest(
+        NetworkRequest(
+            id = InspectorStore.nextPublicId(),
+            method = method,
+            url = url,
+            statusCode = statusCode,
+            durationMillis = durationMillis,
+            requestBytes = requestBytes,
+            responseBytes = responseBytes,
+            timestampMillis = InspectorPlatform.currentTimeMillis(),
+        ),
+    )
+
+    fun recordNonFatal(
+        exceptionType: String,
+        message: String,
+        origin: String,
+        frames: List<StackFrame> = emptyList(),
+    ) = InspectorStore.addCrash(
+        CrashRecord(
+            id = InspectorStore.nextPublicId(),
+            fatal = false,
+            exceptionType = exceptionType,
+            message = message,
+            origin = origin,
+            frames = frames,
+            timestampMillis = InspectorPlatform.currentTimeMillis(),
+        ),
+    )
+
+    fun recordCrash(record: CrashRecord) = InspectorStore.addCrash(record)
+
+    /** The captured requests, newest first. A copy: safe to hold and iterate on any thread. */
+    fun requests(): List<NetworkRequest> = InspectorStore.requests.toList()
+
+    /** Drops captured requests and the unread badge. Logs, crashes, work and database stay. */
+    fun clearRequests() = InspectorStore.clearRequests()
+
+    fun clearLogs() = InspectorStore.clearLogs()
+
+    /**
+     * Replaces the Background Work list. Android-only in the UI; a no-op tab elsewhere.
+     *
+     * Pass [jobs] newest first: the panel shows them in this order by default and its sort toggle
+     * simply reverses it.
+     *
+     * [engineLabel] is shown above the list, e.g. "WorkManager 2.11" — the inspector has no way to
+     * discover the scheduler's version itself.
+     */
+    fun setWork(jobs: List<WorkJob>, engineLabel: String? = null) {
+        if (!enabled) return
+        InspectorStore.work.clear()
+        InspectorStore.work.addAll(jobs)
+        InspectorStore.workLabel = engineLabel
+    }
+
+    /**
+     * Replaces the Database panel's contents. Pass a [controller] when the tables come from a live
+     * database, so the Refresh button re-reads it and cell edits are written back; without one the
+     * panel edits the snapshot in memory only.
+     */
+    fun setDatabase(info: DbInfo, tables: List<DbTable>, controller: DatabaseController? = null) {
+        // Guarded because a controller is a live handle to the host's database. Holding one in a
+        // build where the inspector is off is exactly the exposure this switch exists to prevent.
+        if (!enabled) return
+        InspectorStore.database = info
+        InspectorStore.databaseController = controller
+        InspectorStore.databaseRefreshing = false
+        InspectorStore.tables.clear()
+        InspectorStore.tables.addAll(tables)
+    }
+
+    /**
+     * Header names (case-insensitive) whose values are masked in anything shared off the device.
+     * Defaults cover Authorization, Cookie, Set-Cookie, Proxy-Authorization and X-Api-Key; pass an
+     * empty set to share everything verbatim.
+     */
+    fun redactHeaders(names: Set<String>) {
+        InspectorStore.redactedHeaders = names.map { it.lowercase() }.toSet()
+    }
+
+    /**
+     * Runs [listener] each time the inspector is opened. Use it to push a fresh snapshot of
+     * anything that is not a live stream, so the panels show current data as of the tap.
+     */
+    fun onOpen(listener: () -> Unit) = InspectorStore.addOpenListener(listener)
+
+    fun clear() = InspectorStore.clear()
+}

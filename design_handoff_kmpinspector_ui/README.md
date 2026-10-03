@@ -35,7 +35,7 @@ final and given as exact values below. Reproduce them. Two deliberate exceptions
 
 ## Where this lands in the repo
 
-`library/src/commonMain/kotlin/com/waqas028/kmpinspector/KmpInspector.kt` already has:
+`library/src/commonMain/kotlin/com/mohsiniqbalcui/kmpinspector/KmpInspector.kt` already has:
 
 - `KmpInspector(enabled, content)` — the wrapping composable
 - `DraggableInspectorFab` — drag with clamping, parks bottom-end
@@ -488,4 +488,4 @@ Mono (400/500/700).
   controls above the frame to switch width, platform, populated/first-run data and annotations. The
   right-hand column carries the layout rationale for whatever view is on screen.
 - Target for the implementation:
-  `library/src/commonMain/kotlin/com/waqas028/kmpinspector/` (`KmpInspector.kt` today).
+  `library/src/commonMain/kotlin/com/mohsiniqbalcui/kmpinspector/` (`KmpInspector.kt` today).

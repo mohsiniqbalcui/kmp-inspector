@@ -221,7 +221,7 @@
 					"-framework",
 					Shared,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.waqas028.kmpinspector.sample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mohsiniqbalcui.kmpinspector.sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -253,7 +253,7 @@
 					"-framework",
 					Shared,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.waqas028.kmpinspector.sample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mohsiniqbalcui.kmpinspector.sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

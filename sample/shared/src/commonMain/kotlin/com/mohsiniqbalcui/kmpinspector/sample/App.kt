@@ -1,0 +1,81 @@
+package com.mohsiniqbalcui.kmpinspector.sample
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.mohsiniqbalcui.kmpinspector.Inspector
+import com.mohsiniqbalcui.kmpinspector.InspectorLog
+import com.mohsiniqbalcui.kmpinspector.KmpInspector
+import com.mohsiniqbalcui.kmpinspector.sample.data.NewsUiState
+import com.mohsiniqbalcui.kmpinspector.sample.data.publishDatabaseToInspector
+import com.mohsiniqbalcui.kmpinspector.sample.work.observeWorkForInspector
+import com.mohsiniqbalcui.kmpinspector.sample.work.startNewsRefresh
+import kotlinx.coroutines.launch
+
+@Composable
+fun App() {
+    var state by remember { mutableStateOf(NewsUiState(loading = true)) }
+    val scope = rememberCoroutineScope()
+    var developerOpen by remember { mutableStateOf(false) }
+
+    suspend fun load(isRefresh: Boolean) {
+        val repository = SampleApp.repository
+        val user = repository.ensureUser()
+
+        // Show whatever is cached first: a failed refresh should never blank the screen.
+        val cached = repository.cached()
+        state = state.copy(articles = cached, user = user, loading = true, message = null)
+
+        repository.refresh()
+        val articles = repository.cached()
+
+        state = if (articles.isEmpty()) {
+            // Nothing real to show — seed the handoff fixtures so the inspector is still worth
+            // opening, and say so on screen rather than passing them off as live traffic.
+            seedDemoData(nowMillis())
+            InspectorLog.w("News", "No articles available; falling back to demo data")
+            state.copy(
+                loading = false,
+                usingDemoData = true,
+                message = "Offline or feed unavailable — showing demo data",
+            )
+        } else {
+            publishDatabaseToInspector(SampleApp.database)
+            state.copy(articles = articles, loading = false, usingDemoData = false, message = null)
+        }
+        if (isRefresh) InspectorLog.i("News", "Manual refresh finished")
+    }
+
+    LaunchedEffect(Unit) {
+        Inspector.configure(appId = "com.mohsiniqbalcui.kmpinspector.sample", variant = "debug")
+
+        // Opt in to capturing fatal crashes. Frames starting with this prefix are marked as ours.
+        Inspector.installCrashHandler(appPackagePrefix = "com.mohsiniqbalcui")
+
+        // Enqueue before observing: reporting first would look at an empty queue and the
+        // Background Work tab would stay blank until something else refreshed it.
+        startNewsRefresh(this)
+        observeWorkForInspector(this)
+
+        load(isRefresh = false)
+    }
+
+    MaterialTheme {
+        KmpInspector {
+            if (developerOpen) {
+                DeveloperScreen(onBack = { developerOpen = false })
+            } else {
+                NewsScreen(
+                    state = state,
+                    onRefresh = { scope.launch { load(isRefresh = true) } },
+                    onOpenDeveloper = { developerOpen = true },
+                )
+            }
+        }
+    }
+}
